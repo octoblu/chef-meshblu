@@ -108,7 +108,7 @@ backend nodejs_app_servers_mqtt
   mode tcp
   balance <%= node[:haproxy][:balance] %>
   <% node[:haproxy][:nodejs_backends].each do |backend| -%>
-  server <%= backend['name'] %> <%= backend['ip'] %>:1883 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_nodejs_app] %>
+  server <%= backend['name'] %> <%= backend['ip'] %>:1883 weight <%= backend['backends'] || 10 %> check-send-proxy send-proxy maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_nodejs_app] %>
   <% end -%>
 <% end -%>
 
@@ -349,7 +349,7 @@ frontend https-in
 
 frontend mqtt-in
   mode tcp
-  bind :1883
+  bind :1883 accept-proxy
 
   <% if !node[:haproxy][:nodejs_backends].empty? -%>
   default_backend nodejs_app_servers_mqtt
