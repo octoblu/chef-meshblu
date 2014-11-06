@@ -1,0 +1,79 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'node', '/usr/local/bin/npm', 'install', 'berkshelf', '-g' ]
+2 info using npm@1.4.14
+3 info using node@v0.10.28
+4 verbose node symlink /usr/local/bin/node
+5 verbose cache add [ 'berkshelf', null ]
+6 verbose cache add name=undefined spec="berkshelf" args=["berkshelf",null]
+7 verbose parsed url { protocol: null,
+7 verbose parsed url   slashes: null,
+7 verbose parsed url   auth: null,
+7 verbose parsed url   host: null,
+7 verbose parsed url   port: null,
+7 verbose parsed url   hostname: null,
+7 verbose parsed url   hash: null,
+7 verbose parsed url   search: null,
+7 verbose parsed url   query: null,
+7 verbose parsed url   pathname: 'berkshelf',
+7 verbose parsed url   path: 'berkshelf',
+7 verbose parsed url   href: 'berkshelf' }
+8 silly lockFile 8ba87fea-berkshelf berkshelf
+9 verbose lock berkshelf /Users/jmeskill/.npm/8ba87fea-berkshelf.lock
+10 silly lockFile 8ba87fea-berkshelf berkshelf
+11 silly lockFile 8ba87fea-berkshelf berkshelf
+12 verbose addNamed [ 'berkshelf', '' ]
+13 verbose addNamed [ null, '*' ]
+14 silly lockFile b110e9d5-berkshelf berkshelf@
+15 verbose lock berkshelf@ /Users/jmeskill/.npm/b110e9d5-berkshelf.lock
+16 silly addNameRange { name: 'berkshelf', range: '*', hasData: false }
+17 verbose url raw berkshelf
+18 verbose url resolving [ 'https://registry.npmjs.org/', './berkshelf' ]
+19 verbose url resolved https://registry.npmjs.org/berkshelf
+20 info trying registry request attempt 1 at 14:47:55
+21 http GET https://registry.npmjs.org/berkshelf
+22 http 404 https://registry.npmjs.org/berkshelf
+23 verbose headers { date: 'Thu, 06 Nov 2014 21:47:55 GMT',
+23 verbose headers   server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+23 verbose headers   'content-type': 'application/json',
+23 verbose headers   'cache-control': 'max-age=0',
+23 verbose headers   'content-length': '52',
+23 verbose headers   'accept-ranges': 'bytes',
+23 verbose headers   via: '1.1 varnish',
+23 verbose headers   age: '0',
+23 verbose headers   'x-served-by': 'cache-sjc3130-SJC',
+23 verbose headers   'x-cache': 'MISS',
+23 verbose headers   'x-cache-hits': '0',
+23 verbose headers   'x-timer': 'S1415310475.627158,VS0,VE353',
+23 verbose headers   'keep-alive': 'timeout=10, max=50',
+23 verbose headers   connection: 'Keep-Alive' }
+24 silly registry.get cb [ 404,
+24 silly registry.get   { date: 'Thu, 06 Nov 2014 21:47:55 GMT',
+24 silly registry.get     server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+24 silly registry.get     'content-type': 'application/json',
+24 silly registry.get     'cache-control': 'max-age=0',
+24 silly registry.get     'content-length': '52',
+24 silly registry.get     'accept-ranges': 'bytes',
+24 silly registry.get     via: '1.1 varnish',
+24 silly registry.get     age: '0',
+24 silly registry.get     'x-served-by': 'cache-sjc3130-SJC',
+24 silly registry.get     'x-cache': 'MISS',
+24 silly registry.get     'x-cache-hits': '0',
+24 silly registry.get     'x-timer': 'S1415310475.627158,VS0,VE353',
+24 silly registry.get     'keep-alive': 'timeout=10, max=50',
+24 silly registry.get     connection: 'Keep-Alive' } ]
+25 silly lockFile b110e9d5-berkshelf berkshelf@
+26 silly lockFile b110e9d5-berkshelf berkshelf@
+27 error 404 404 Not Found: berkshelf
+27 error 404
+27 error 404 'berkshelf' is not in the npm registry.
+27 error 404 You should bug the author to publish it
+27 error 404
+27 error 404 Note that you can also install from a
+27 error 404 tarball, folder, or http url, or git url.
+28 error System Darwin 14.0.0
+29 error command "node" "/usr/local/bin/npm" "install" "berkshelf" "-g"
+30 error cwd /Users/jmeskill/Projects/Octoblu/chef-meshblu
+31 error node -v v0.10.28
+32 error npm -v 1.4.14
+33 error code E404
+34 verbose exit [ 1, true ]
