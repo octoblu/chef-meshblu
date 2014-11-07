@@ -41,7 +41,6 @@ defaults
   <% end -%>
   cookie AIOSERVERID insert indirect nocache
 
-<% if !node[:haproxy][:nodejs_backends].empty? -%>
 backend nodejs_app_servers
   balance <%= node[:haproxy][:balance] %>
   option redispatch
@@ -66,16 +65,12 @@ backend nodejs_app_servers_websocket
   server <%= backend['name'] %> <%= backend['ip'] %>:80 weight <%= backend['backends'] || 10 %> check-send-proxy send-proxy maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_nodejs_app] %> check inter <%= node[:haproxy][:check_interval] %>
   <% end -%>
 
-<% end -%>
-
-<% if !node[:haproxy][:nodejs_backends].empty? -%>
 backend nodejs_app_servers_mqtt
   mode tcp
   balance <%= node[:haproxy][:balance] %>
   <% node[:haproxy][:nodejs_backends].each do |backend| -%>
   server <%= backend['name'] %> <%= backend['ip'] %>:1883 weight <%= backend['backends'] || 10 %> check-send-proxy send-proxy maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_nodejs_app] %>
   <% end -%>
-<% end -%>
 
 frontend http-in
   bind :80 accept-proxy
@@ -112,5 +107,3 @@ frontend mqtt-in
   <% if !node[:haproxy][:nodejs_backends].empty? -%>
   default_backend nodejs_app_servers_mqtt
   <% end -%>
-
-<% end -%>
