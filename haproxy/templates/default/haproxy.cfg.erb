@@ -93,10 +93,12 @@ frontend http-in
 
   <% node[:haproxy][:nodejs_applications].each do |app_name, app_config| -%>
     <% app_config['domains'].each do |domain| -%>
-use_backend nodejs_app_servers_websocket if nodejs_websocket_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %>
-use_backend nodejs_app_servers if nodejs_application_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %>
+  use_backend nodejs_app_servers_websocket if nodejs_websocket_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %>
+  use_backend nodejs_app_servers if nodejs_application_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %>
     <% end -%>
   <% end -%>
+
+  default_backend nodejs_app_servers
 
 frontend mqtt-in
   mode tcp
