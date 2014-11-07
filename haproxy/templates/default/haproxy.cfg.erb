@@ -91,12 +91,10 @@ frontend http-in
   <% end -%>
 
 
-  <% unless node[:haproxy][:nodejs_applications].empty? || node[:haproxy][:nodejs_backends].empty? -%>
-    <% node[:haproxy][:nodejs_applications].each do |app_name, app_config| -%>
-      <% app_config['domains'].each do |domain| -%>
-  use_backend nodejs_app_servers_websocket if nodejs_websocket_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %>
-  use_backend nodejs_app_servers if nodejs_application_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %>
-      <% end -%>
+  <% node[:haproxy][:nodejs_applications].each do |app_name, app_config| -%>
+    <% app_config['domains'].each do |domain| -%>
+use_backend nodejs_app_servers_websocket if nodejs_websocket_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %>
+use_backend nodejs_app_servers if nodejs_application_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %>
     <% end -%>
   <% end -%>
 
@@ -104,6 +102,4 @@ frontend mqtt-in
   mode tcp
   bind :1883 accept-proxy
 
-  <% if !node[:haproxy][:nodejs_backends].empty? -%>
   default_backend nodejs_app_servers_mqtt
-  <% end -%>
