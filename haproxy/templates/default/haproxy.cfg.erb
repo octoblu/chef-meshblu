@@ -43,6 +43,7 @@ defaults
 
 backend nodejs_app_servers
   balance <%= node[:haproxy][:balance] %>
+  appsession connect.sid len 66 timeout 24h request-learn prefix
   option redispatch
   option forwardfor
   option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
@@ -52,6 +53,7 @@ backend nodejs_app_servers
 
 backend nodejs_app_servers_websocket
   balance <%= node[:haproxy][:balance] %>
+  appsession connect.sid len 66 timeout 24h request-learn prefix
   timeout queue 5000
   timeout server 86400000
   timeout connect 86400000
