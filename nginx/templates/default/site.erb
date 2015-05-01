@@ -8,6 +8,10 @@ server {
     try_files $uri /index.html;
   }
 
+  location /js/meshblu.js {
+    return 301 https://d1g8h12lk9ydf.cloudfront.net/js/latest/meshblu.bundle.js
+  }
+
   # Block all svn access
   if ($request_uri ~* ^.*\.svn.*$) {
      return 404;
