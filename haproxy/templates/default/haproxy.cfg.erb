@@ -39,21 +39,21 @@ defaults
   stats auth <%= node[:haproxy][:stats_user] %>:<%= node[:haproxy][:stats_password] %>
   stats uri <%= node[:haproxy][:stats_url] %>
   <% end -%>
-  cookie AIOSERVERID insert indirect nocache
+  cookie MESHBLUSRV insert indirect nocache
 
 backend nodejs_app_servers
   balance <%= node[:haproxy][:balance] %>
-  appsession connect.sid len 66 timeout 24h request-learn prefix
+  appsession MESHBLUSRV len 66 timeout 24h request-learn prefix
   option redispatch
   option forwardfor
   option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
   <% node[:haproxy][:nodejs_backends].each do |backend| -%>
-  server <%= backend['name'] %> <%= backend['ip'] %>:80 weight <%= backend['backends'] || 10 %> check-send-proxy send-proxy maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_nodejs_app] %> check inter <%= node[:haproxy][:check_interval] %>
+  server <%= backend['name'] %> <%= backend['ip'] %>:80 weight <%= backend['backends'] || 10 %> cookie <%= backend['name'] %> check-send-proxy send-proxy maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_nodejs_app] %> check inter <%= node[:haproxy][:check_interval] %>
   <% end -%>
 
 backend nodejs_app_servers_websocket
   balance <%= node[:haproxy][:balance] %>
-  appsession connect.sid len 66 timeout 24h request-learn prefix
+  appsession MESHBLUSRV len 66 timeout 24h request-learn prefix
   timeout queue 5000
   timeout server 86400000
   timeout connect 86400000
@@ -61,25 +61,10 @@ backend nodejs_app_servers_websocket
   option forwardfor
   no option httpclose
   option http-server-close
-  option forceclose  
+  option forceclose
   option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
   <% node[:haproxy][:nodejs_backends].each do |backend| -%>
-  server <%= backend['name'] %> <%= backend['ip'] %>:80 weight <%= backend['backends'] || 10 %> check-send-proxy send-proxy maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_nodejs_app] %> check inter <%= node[:haproxy][:check_interval] %>
-  <% end -%>
-
-backend nodejs_app_servers_websocket_only
-  balance leastconn
-  timeout queue 5000
-  timeout server 86400000
-  timeout connect 86400000
-  timeout check 1s
-  option forwardfor
-  no option httpclose
-  option http-server-close
-  option forceclose  
-  option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
-  <% node[:haproxy][:nodejs_backends].each do |backend| -%>
-  server <%= backend['name'] %> <%= backend['ip'] %>:80 weight <%= backend['backends'] || 10 %> check-send-proxy send-proxy maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_nodejs_app] %> check inter <%= node[:haproxy][:check_interval] %>
+  server <%= backend['name'] %> <%= backend['ip'] %>:80 weight <%= backend['backends'] || 10 %> cookie <%= backend['name'] %> check-send-proxy send-proxy maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_nodejs_app] %> check inter <%= node[:haproxy][:check_interval] %>
   <% end -%>
 
 backend nodejs_app_servers_mqtt
@@ -97,23 +82,20 @@ frontend http-in
   tcp-request inspect-delay 1000ms
   tcp-request content accept unless too_fast
   tcp-request content accept if WAIT_END
+  tcp-request content reject
 
   # all domains of node.js applications
   <% node[:haproxy][:nodejs_applications].each do |app_name, app_config| -%>
     <% app_config['domains'].each do |domain| -%>
-  acl nodejs_websocket_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %> hdr_end(host) -i <%= domain %> hdr(Upgrade) -i WebSocket
-  acl nodejs_application_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %> hdr_end(host) -i <%= domain %>
-  acl nodejs_websocket_only_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %> hdr_beg(host) -i socket
-  acl nodejs_application_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %> path_beg /api /auth /connect /unlink
+  acl nodejs_websocket_<%= app_name %> hdr(Upgrade) -i WebSocket
+  acl nodejs_application_<%= app_name %> path_beg /api /auth /connect /unlink
     <% end -%>
   <% end -%>
 
 
   <% node[:haproxy][:nodejs_applications].each do |app_name, app_config| -%>
     <% app_config['domains'].each do |domain| -%>
-  use_backend nodejs_app_servers_websocket_only if nodejs_websocket_only_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %>
-  use_backend nodejs_app_servers_websocket if nodejs_websocket_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %>
-  use_backend nodejs_app_servers if nodejs_application_<%= app_name %>_domain_<%= domain.gsub(/[^\w.:-]/, '_') %>
+  use_backend nodejs_app_servers_websocket if nodejs_websocket_<%= app_name %>
     <% end -%>
   <% end -%>
 
