@@ -110,8 +110,8 @@ frontend http-in
     <% end -%>
   <% end -%>
 
-  use_backend nodejs_app_servers_socketio if is_socketio
   use_backend nodejs_app_servers_websocket if is_socketdot
+  use_backend nodejs_app_servers_socketio if is_socketio
   <% node[:haproxy][:nodejs_applications].each do |app_name, app_config| -%>
   use_backend nodejs_app_servers_websocket if nodejs_websocket_<%= app_name %>
   <% end -%>
