@@ -90,6 +90,11 @@ backend nodejs_app_servers_mqtt
   server <%= backend['name'] %> <%= backend['ip'] %>:1883 weight <%= backend['backends'] || 10 %> check-send-proxy send-proxy maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_nodejs_app] %>
   <% end -%>
 
+backend slow_down
+  timeout tarpit 2s
+  errorfile 500 /etc/haproxy/errors/429.http
+  http-request tarpit
+
 frontend http-in
   bind :80 accept-proxy
 
@@ -105,11 +110,13 @@ frontend http-in
     <% app_config['domains'].each do |domain| -%>
   acl is_socketio path_beg /socket.io
   acl is_socketdot hdr_beg(host) -i socket
+  acl is_longconn path_beg /subscribe /data
   acl nodejs_websocket_<%= app_name %> hdr(Upgrade) -i WebSocket
   acl nodejs_application_<%= app_name %> path_beg /api /auth /connect /unlink
     <% end -%>
   <% end -%>
 
+  use_backend nodejs_app_servers_websocket if is_longconn
   use_backend nodejs_app_servers_websocket if is_socketdot
   use_backend nodejs_app_servers_socketio if is_socketio
   <% node[:haproxy][:nodejs_applications].each do |app_name, app_config| -%>
