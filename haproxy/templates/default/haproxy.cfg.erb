@@ -83,6 +83,22 @@ backend nodejs_app_servers_websocket
   server <%= backend['name'] %> <%= backend['ip'] %>:80 weight <%= backend['backends'] || 10 %> cookie <%= backend['name'] %> check-send-proxy send-proxy maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_nodejs_app] %> check inter <%= node[:haproxy][:check_interval] %>
   <% end -%>
 
+backend nodejs_app_servers_flowmeshblu
+  balance <%= node[:haproxy][:websocket_balance] || node[:haproxy][:balance] %>
+  appsession MESHBLUSRV len 66 timeout 24h request-learn prefix
+  timeout queue 5000
+  timeout server 86400000
+  timeout connect 86400000
+  timeout check 1s
+  option forwardfor
+  no option httpclose
+  option http-server-close
+  option forceclose
+  option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
+  <% node[:haproxy][:nodejs_backends].each do |backend| -%>
+  server <%= backend['name'] %> <%= backend['ip'] %>:80 weight <%= backend['backends'] || 10 %> cookie <%= backend['name'] %> check-send-proxy send-proxy maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_nodejs_app] %> check inter <%= node[:haproxy][:check_interval] %>
+  <% end -%>
+
 backend nodejs_app_servers_mqtt
   mode tcp
   balance <%= node[:haproxy][:balance] %>
@@ -104,25 +120,33 @@ frontend http-in
   tcp-request content accept unless too_fast
   tcp-request content accept if WAIT_END
   tcp-request content reject
+  
+  stick-table type ip size 500k expire 30s store conn_cur,conn_rate(10s),http_req_rate(10s),http_err_rate(10s)
+  tcp-request content track-sc0 src
+
+  acl slow_down if { src_conn_rate ge 100 }
+  acl slow_down if { sc0_http_err_rate() gt 100 }
+  acl slow_down if { sc0_http_req_rate() gt 500 }
 
   # all domains of node.js applications
   <% node[:haproxy][:nodejs_applications].each do |app_name, app_config| -%>
     <% app_config['domains'].each do |domain| -%>
   acl is_socketio path_beg /socket.io
   acl is_socketdot hdr_beg(host) -i socket
-  acl is_socketdot hdr_beg(host) -i flow-meshblu
+  acl is_flowmeshblu hdr_beg(host) -i flow-meshblu
   acl is_longconn path_beg /subscribe /data
   acl nodejs_websocket_<%= app_name %> hdr(Upgrade) -i WebSocket
   acl nodejs_application_<%= app_name %> path_beg /api /auth /connect /unlink
     <% end -%>
   <% end -%>
 
+  use_backend nodejs_app_servers_meshblu if is_flowmeshblu
   use_backend nodejs_app_servers_websocket if is_longconn
   use_backend nodejs_app_servers_websocket if is_socketdot
+  use_backend nodejs_app_servers_socketio if is_socketio
   <% node[:haproxy][:nodejs_applications].each do |app_name, app_config| -%>
   use_backend nodejs_app_servers_websocket if nodejs_websocket_<%= app_name %>
   <% end -%>
-  use_backend nodejs_app_servers_socketio if is_socketio
 
   default_backend nodejs_app_servers
 
