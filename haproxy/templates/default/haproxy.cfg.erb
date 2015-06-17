@@ -110,6 +110,7 @@ frontend http-in
     <% app_config['domains'].each do |domain| -%>
   acl is_socketio path_beg /socket.io
   acl is_socketdot hdr_beg(host) -i socket
+  acl is_socketdot hdr_beg(host) -i flow-meshblu
   acl is_longconn path_beg /subscribe /data
   acl nodejs_websocket_<%= app_name %> hdr(Upgrade) -i WebSocket
   acl nodejs_application_<%= app_name %> path_beg /api /auth /connect /unlink
@@ -118,10 +119,10 @@ frontend http-in
 
   use_backend nodejs_app_servers_websocket if is_longconn
   use_backend nodejs_app_servers_websocket if is_socketdot
-  use_backend nodejs_app_servers_socketio if is_socketio
   <% node[:haproxy][:nodejs_applications].each do |app_name, app_config| -%>
   use_backend nodejs_app_servers_websocket if nodejs_websocket_<%= app_name %>
   <% end -%>
+  use_backend nodejs_app_servers_socketio if is_socketio
 
   default_backend nodejs_app_servers
 
