@@ -124,9 +124,9 @@ frontend http-in
   stick-table type ip size 500k expire 30s store conn_cur,conn_rate(10s),http_req_rate(10s),http_err_rate(10s)
   tcp-request content track-sc0 src
 
-  acl slow_down if { src_conn_rate ge 100 }
-  acl slow_down if { sc0_http_err_rate() gt 100 }
-  acl slow_down if { sc0_http_req_rate() gt 500 }
+  #acl slow_down if { src_conn_rate ge 100 }
+  #acl slow_down if { sc0_http_err_rate() gt 100 }
+  #acl slow_down if { sc0_http_req_rate() gt 500 }
 
   # all domains of node.js applications
   <% node[:haproxy][:nodejs_applications].each do |app_name, app_config| -%>
@@ -140,7 +140,7 @@ frontend http-in
     <% end -%>
   <% end -%>
 
-  use_backend slow_down if slow_down
+  #use_backend slow_down if slow_down
   use_backend nodejs_app_servers_flowmeshblu if is_flowmeshblu
   use_backend nodejs_app_servers_websocket if is_longconn
   use_backend nodejs_app_servers_websocket if is_socketdot
