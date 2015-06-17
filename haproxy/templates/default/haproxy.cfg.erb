@@ -140,7 +140,8 @@ frontend http-in
     <% end -%>
   <% end -%>
 
-  use_backend nodejs_app_servers_meshblu if is_flowmeshblu
+  use_backend slow_down if slow_down
+  use_backend nodejs_app_servers_flowmeshblu if is_flowmeshblu
   use_backend nodejs_app_servers_websocket if is_longconn
   use_backend nodejs_app_servers_websocket if is_socketdot
   use_backend nodejs_app_servers_socketio if is_socketio
