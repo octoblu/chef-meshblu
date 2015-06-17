@@ -115,7 +115,7 @@ frontend http-in
   bind :80 accept-proxy
 
   # At most 10 concurrent connections from a client
-  acl too_fast fe_sess_rate ge 100
+  acl too_fast fe_sess_rate ge <%= node[:haproxy][:session_rate_limit] || 10 %>
   tcp-request inspect-delay 1000ms
   tcp-request content accept unless too_fast
   tcp-request content accept if WAIT_END
