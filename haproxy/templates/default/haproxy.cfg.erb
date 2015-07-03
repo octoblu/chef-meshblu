@@ -46,6 +46,7 @@ backend nodejs_app_servers
   appsession MESHBLUSRV len 66 timeout 24h request-learn prefix
   option redispatch
   option forwardfor
+  no option httpclose
   option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
   <% node[:haproxy][:nodejs_backends].each do |backend| -%>
   server <%= backend['name'] %> <%= backend['ip'] %>:80 weight <%= backend['backends'] || 10 %> cookie <%= backend['name'] %> check-send-proxy send-proxy maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_nodejs_app] %> check inter <%= node[:haproxy][:check_interval] %>
@@ -75,9 +76,6 @@ backend nodejs_app_servers_websocket
   timeout connect 86400000
   timeout check 1s
   option forwardfor
-  no option httpclose
-  option http-server-close
-  option forceclose
   option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
   <% node[:haproxy][:nodejs_backends].each do |backend| -%>
   server <%= backend['name'] %> <%= backend['ip'] %>:80 weight <%= backend['backends'] || 10 %> cookie <%= backend['name'] %> check-send-proxy send-proxy maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_nodejs_app] %> check inter <%= node[:haproxy][:check_interval] %>
@@ -120,7 +118,7 @@ frontend http-in
   tcp-request content accept unless too_fast
   tcp-request content accept if WAIT_END
   tcp-request content reject
-  
+
   stick-table type ip size 500k expire 30s store conn_cur,conn_rate(10s),http_req_rate(10s),http_err_rate(10s)
   tcp-request content track-sc0 src
 
